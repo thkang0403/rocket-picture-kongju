@@ -1921,6 +1921,10 @@ function attachPlayerVisual(playerGroup, modelName) {
     playerGroup.userData.playerVisual = null;
   }
 
+  const fallbackVisual = createFallbackPlayerVisual(modelName);
+  playerGroup.userData.playerVisual = fallbackVisual;
+  playerGroup.add(fallbackVisual);
+
   loadModelTemplate(modelName)
     .then((template) => {
       if (!scene || !playerGroup.parent) {
@@ -1929,12 +1933,51 @@ function attachPlayerVisual(playerGroup, modelName) {
 
       const visual = template.clone(true);
       normalizePlayerVisual(visual, modelName === "rabbit" ? 1.8 : 1.55);
+      if (playerGroup.userData.playerVisual) {
+        playerGroup.remove(playerGroup.userData.playerVisual);
+      }
       playerGroup.userData.playerVisual = visual;
       playerGroup.add(visual);
     })
     .catch((error) => {
       console.error(`Failed to load ${modelName}.glb:`, error);
     });
+}
+
+function createFallbackPlayerVisual(modelName) {
+  const group = new THREE.Group();
+  const colorByModel = {
+    rabbit: 0xf8fafc,
+    cat: 0x111827,
+    hamster: 0xf7c57e
+  };
+  const accentByModel = {
+    rabbit: 0x7dd3fc,
+    cat: 0xfbbf24,
+    hamster: 0xec4899
+  };
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(0.28, 0.72, 5, 10),
+    createMaterial(colorByModel[modelName] || 0xf8fafc, 0.88)
+  );
+  body.position.y = 0.78;
+  group.add(body);
+
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(0.32, 14, 10),
+    createMaterial(colorByModel[modelName] || 0xf8fafc, 0.88)
+  );
+  head.position.y = 1.32;
+  group.add(head);
+
+  const face = new THREE.Mesh(
+    new THREE.SphereGeometry(0.08, 10, 8),
+    createMaterial(accentByModel[modelName] || 0x60a5fa, 0.8)
+  );
+  face.position.set(0, 1.34, -0.29);
+  group.add(face);
+
+  return group;
 }
 
 function normalizePlayerVisual(visual, targetHeight) {
