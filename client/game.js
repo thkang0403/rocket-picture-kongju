@@ -17,8 +17,10 @@ const JUMP_DURATION_MS = 650;
 const JUMP_HEIGHT = 0.75;
 const POSITION_SMOOTHING_SPEED = 18;
 const ROTATION_SMOOTHING_SPEED = 16;
-const LOCAL_POSITION_SMOOTHING_SPEED = 22;
-const LOCAL_CORRECTION_DEAD_ZONE = 0.035;
+const VISUAL_PLAYER_SPEED = 230 * WORLD_SCALE;
+const LOCAL_POSITION_SMOOTHING_SPEED = 10;
+const LOCAL_CORRECTION_DEAD_ZONE = 0.12;
+const LOCAL_SERVER_SNAP_DISTANCE = 2.1;
 const CAMERA_POSITION_SMOOTHING_SPEED = 7;
 const CAMERA_TARGET_SMOOTHING_SPEED = 10;
 
@@ -85,7 +87,7 @@ function applyMobileControlsClass() {
 }
 
 function getRendererPixelRatio() {
-  const maxPixelRatio = isMobileControlsDevice() ? 1.25 : 2;
+  const maxPixelRatio = isMobileControlsDevice() ? 0.9 : 1.35;
   return Math.min(window.devicePixelRatio || 1, maxPixelRatio);
 }
 
@@ -497,7 +499,7 @@ function startGame(initialPlayers) {
   cameraPitch = mapData.theme === "corridor-3f" ? 0.24 : 0.55;
   cameraDistance = mapData.theme === "corridor-3f" ? 9.8 : 8.8;
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
+  renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: false, powerPreference: "high-performance" });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(getRendererPixelRatio());
   renderer.shadowMap.enabled = false;
@@ -2222,6 +2224,32 @@ function getMovementRotation(movement) {
   return Math.atan2(-movement.x, -movement.z);
 }
 
+function predictLocalPlayerMovement(model, deltaSeconds) {
+  if (model.userData.seatedChairId || latestMovementVector.lengthSq() <= 0.0001) {
+    return;
+  }
+
+  const movement = latestMovementVector.clone();
+  if (movement.lengthSq() > 1) {
+    movement.normalize();
+  }
+
+  const step = VISUAL_PLAYER_SPEED * deltaSeconds;
+  const nextX = model.position.clone();
+  nextX.x += movement.x * step;
+  if (canPlaceLocalPlayer(nextX)) {
+    model.position.x = nextX.x;
+  }
+
+  const nextZ = model.position.clone();
+  nextZ.z += movement.z * step;
+  if (canPlaceLocalPlayer(nextZ)) {
+    model.position.z = nextZ.z;
+  }
+
+  model.userData.targetRotation = getMovementRotation(movement);
+}
+
 function smoothLocalPlayer(model, targetPosition, targetRotation, deltaSeconds, rotationAlpha) {
   const hasMovement = latestMovementVector.lengthSq() > 0.0001;
 
@@ -2229,13 +2257,18 @@ function smoothLocalPlayer(model, targetPosition, targetRotation, deltaSeconds, 
     model.userData.targetRotation = getMovementRotation(latestMovementVector);
   }
 
+  predictLocalPlayerMovement(model, deltaSeconds);
+
   if (targetPosition) {
     const horizontalDistance = Math.hypot(
       model.position.x - targetPosition.x,
       model.position.z - targetPosition.z
     );
 
-    if (horizontalDistance > LOCAL_CORRECTION_DEAD_ZONE) {
+    if (horizontalDistance > LOCAL_SERVER_SNAP_DISTANCE) {
+      model.position.x = targetPosition.x;
+      model.position.z = targetPosition.z;
+    } else if (horizontalDistance > LOCAL_CORRECTION_DEAD_ZONE) {
       const correctionAlpha = smoothingAlpha(LOCAL_POSITION_SMOOTHING_SPEED, deltaSeconds);
       model.position.x += (targetPosition.x - model.position.x) * correctionAlpha;
       model.position.z += (targetPosition.z - model.position.z) * correctionAlpha;
