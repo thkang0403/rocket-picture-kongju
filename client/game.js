@@ -85,6 +85,11 @@ function applyMobileControlsClass() {
   document.body.classList.toggle("mobile-controls", isMobileControlsDevice());
 }
 
+function getRendererPixelRatio() {
+  const maxPixelRatio = isMobileControlsDevice() ? 1.25 : 2;
+  return Math.min(window.devicePixelRatio || 1, maxPixelRatio);
+}
+
 function resetMovementInput() {
   Object.keys(keys).forEach((key) => {
     keys[key] = false;
@@ -493,9 +498,9 @@ function startGame(initialPlayers) {
   cameraPitch = mapData.theme === "corridor-3f" ? 0.24 : 0.55;
   cameraDistance = mapData.theme === "corridor-3f" ? 9.8 : 8.8;
 
-  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
+  renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: false });
   renderer.setSize(container.clientWidth, container.clientHeight);
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(getRendererPixelRatio());
   renderer.shadowMap.enabled = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.innerHTML = "";
@@ -2843,7 +2848,7 @@ window.addEventListener("resize", () => {
   const container = document.getElementById("gameContainer");
   camera.aspect = container.clientWidth / container.clientHeight;
   camera.updateProjectionMatrix();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setPixelRatio(getRendererPixelRatio());
   renderer.setSize(container.clientWidth, container.clientHeight);
 });
 
