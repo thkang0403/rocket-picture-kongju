@@ -8,7 +8,7 @@ const WORLD_SCALE = 0.0425;
 const PLAYER_HEIGHT = 1.55;
 const PLAYER_RADIUS = 0.34;
 const PLAYER_CONTACT_SCALE = 14 / 22;
-const VISUAL_PLAYER_SPEED = 240 * WORLD_SCALE;
+const VISUAL_PLAYER_SPEED = 230 * WORLD_SCALE;
 const CORRIDOR_WALL_HEIGHT = 5.95;
 const CORRIDOR_CEILING_Y = 6.05;
 const CORRIDOR_CEILING_THICKNESS = 0.16;
@@ -758,9 +758,9 @@ function buildGrassFieldScene(roomSize) {
   scene.background = new THREE.Color(0x45cfff);
   scene.fog = new THREE.Fog(0x8eeaff, 62, 145);
 
-  scene.add(new THREE.HemisphereLight(0xfff0c7, 0x82b964, 1.7));
+  scene.add(new THREE.HemisphereLight(0xfff0c7, 0x82b964, 2.15));
 
-  const sun = new THREE.DirectionalLight(0xffc879, 1.85);
+  const sun = new THREE.DirectionalLight(0xffc879, 3.15);
   sun.position.set(-18, 28, 12);
   sun.castShadow = false;
   sun.shadow.mapSize.width = 2048;
