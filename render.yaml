@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: rocket-picture-kongju
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: PUBLIC_ROOM_CODE
+        value: PUBLIC

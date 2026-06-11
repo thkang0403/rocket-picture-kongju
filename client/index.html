@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rocket Picture</title>
+    <link rel="stylesheet" href="/style.css?v=rocket-friends-v2" />
+  </head>
+  <body>
+    <main id="app">
+      <section id="lobby" class="panel">
+        <div class="lobby-title">
+          <span class="title-kicker">Public Party Map</span>
+          <button id="titleLogoButton" class="title-logo-button" type="button" aria-label="Play title animation">
+            <img class="title-logo" src="/assets/rocket-picture-title.png" alt="Rocket Picture" />
+          </button>
+          <img id="titleFriendsFlyer" class="title-friends-flyer" src="/assets/rocket-friends.png" alt="" aria-hidden="true" />
+          <p>Create a room, load a beta photo, or join with a code.</p>
+        </div>
+        <div class="controls">
+          <button id="createRoomButton" type="button">Create Room</button>
+          <div id="roomCodeDisplay" class="room-code">No room yet</div>
+          <label for="nicknameInput">Nickname</label>
+          <input id="nicknameInput" class="normal-input" type="text" maxlength="18" autocomplete="off" placeholder="Your name" />
+          <label for="panoramaInput">Beta Map Photo</label>
+          <input id="panoramaInput" class="normal-input" type="file" accept="image/jpeg,image/jpg,image/png" />
+          <div id="panoramaStatus" class="panorama-status">Only the assigned 3층 복도.jpg beta photo is supported.</div>
+          <label for="joinRoomInput">Room Code</label>
+          <input id="joinRoomInput" type="text" maxlength="6" autocomplete="off" placeholder="ABC123" />
+          <button id="joinRoomButton" type="button">Join Room</button>
+          <div class="saved-room-panel">
+            <div class="saved-room-header">
+              <span>Saved Rooms</span>
+              <button id="refreshSavedRoomsButton" class="small-button" type="button">Refresh</button>
+            </div>
+            <div id="savedRoomsList" class="saved-room-list"></div>
+          </div>
+          <div id="errorMessage" class="message error"></div>
+          <div id="statusMessage" class="message status"></div>
+        </div>
+      </section>
+
+      <section id="gameArea" class="hidden">
+        <div id="gameHeader">
+          <span>Room: <strong id="activeRoomCode">------</strong></span>
+          <span id="saveStateBadge" class="save-badge unsaved">Unsaved</span>
+          <span id="playerCount">Players: 0</span>
+          <button id="saveRoomButton" class="header-button hidden" type="button">Save Room</button>
+          <button id="deleteSavedRoomButton" class="header-button danger hidden" type="button">Delete Save</button>
+          <span id="disconnectNotice"></span>
+        </div>
+        <div id="gameContainer"></div>
+        <div id="mobileJoystick" aria-hidden="true">
+          <div id="joystickBase">
+            <div id="joystickKnob"></div>
+          </div>
+        </div>
+        <button id="mobileJumpButton" type="button" aria-label="Jump">Jump</button>
+        <section id="memberPanel">
+          <div class="member-panel-header">
+            <span>Members</span>
+          </div>
+          <div id="memberList"></div>
+        </section>
+        <section id="chatPanel">
+          <div id="chatMessages"></div>
+          <form id="chatForm">
+            <input id="chatInput" class="normal-input" type="text" maxlength="160" autocomplete="off" placeholder="Message" />
+            <button id="chatSendButton" type="submit">Send</button>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/ui.js?v=rocket-friends-v1"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/three/three.module.js"
+        }
+      }
+    </script>
+    <script type="module" src="/game.js?v=player-speed-240-v1"></script>
+  </body>
+</html>
