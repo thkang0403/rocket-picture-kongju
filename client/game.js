@@ -8,7 +8,6 @@ const WORLD_SCALE = 0.0425;
 const PLAYER_HEIGHT = 1.55;
 const PLAYER_RADIUS = 0.34;
 const PLAYER_CONTACT_SCALE = 14 / 22;
-const VISUAL_PLAYER_SPEED = 230 * WORLD_SCALE;
 const CORRIDOR_WALL_HEIGHT = 5.95;
 const CORRIDOR_CEILING_Y = 6.05;
 const CORRIDOR_CEILING_THICKNESS = 0.16;
@@ -18,8 +17,8 @@ const JUMP_DURATION_MS = 650;
 const JUMP_HEIGHT = 0.75;
 const POSITION_SMOOTHING_SPEED = 18;
 const ROTATION_SMOOTHING_SPEED = 16;
-const LOCAL_CORRECTION_SMOOTHING_SPEED = 3.5;
-const LOCAL_CORRECTION_DEAD_ZONE = 0.08;
+const LOCAL_POSITION_SMOOTHING_SPEED = 22;
+const LOCAL_CORRECTION_DEAD_ZONE = 0.035;
 const CAMERA_POSITION_SMOOTHING_SPEED = 7;
 const CAMERA_TARGET_SMOOTHING_SPEED = 10;
 
@@ -2182,26 +2181,8 @@ function getMovementRotation(movement) {
 
 function smoothLocalPlayer(model, targetPosition, targetRotation, deltaSeconds, rotationAlpha) {
   const hasMovement = latestMovementVector.lengthSq() > 0.0001;
-  let blockedByPlayer = false;
 
   if (hasMovement && !model.userData.seatedChairId) {
-    const movementStep = latestMovementVector.clone().multiplyScalar(VISUAL_PLAYER_SPEED * deltaSeconds);
-    const nextX = model.position.clone();
-    nextX.x += movementStep.x;
-    if (canPlaceLocalPlayer(nextX)) {
-      model.position.x = nextX.x;
-    } else if (isCloseToOtherPlayerWorld(nextX)) {
-      blockedByPlayer = true;
-    }
-
-    const nextZ = model.position.clone();
-    nextZ.z += movementStep.z;
-    if (canPlaceLocalPlayer(nextZ)) {
-      model.position.z = nextZ.z;
-    } else if (isCloseToOtherPlayerWorld(nextZ)) {
-      blockedByPlayer = true;
-    }
-
     model.userData.targetRotation = getMovementRotation(latestMovementVector);
   }
 
@@ -2211,13 +2192,8 @@ function smoothLocalPlayer(model, targetPosition, targetRotation, deltaSeconds, 
       model.position.z - targetPosition.z
     );
 
-    if (blockedByPlayer && horizontalDistance < 0.9) {
-      // Keep contact visually stable instead of pulling back every frame while pushing into another player.
-    } else if (horizontalDistance > LOCAL_CORRECTION_DEAD_ZONE) {
-      const correctionSpeed = horizontalDistance > 1.1
-      ? POSITION_SMOOTHING_SPEED
-      : LOCAL_CORRECTION_SMOOTHING_SPEED;
-      const correctionAlpha = smoothingAlpha(correctionSpeed, deltaSeconds);
+    if (horizontalDistance > LOCAL_CORRECTION_DEAD_ZONE) {
+      const correctionAlpha = smoothingAlpha(LOCAL_POSITION_SMOOTHING_SPEED, deltaSeconds);
       model.position.x += (targetPosition.x - model.position.x) * correctionAlpha;
       model.position.z += (targetPosition.z - model.position.z) * correctionAlpha;
     }
