@@ -496,7 +496,7 @@ function startGame(initialPlayers) {
   renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.enabled = false;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.innerHTML = "";
   renderer.domElement.tabIndex = 0;
@@ -753,11 +753,11 @@ function buildGrassFieldScene(roomSize) {
   scene.background = new THREE.Color(0x45cfff);
   scene.fog = new THREE.Fog(0x8eeaff, 62, 145);
 
-  scene.add(new THREE.HemisphereLight(0xfff0c7, 0x82b964, 2.15));
+  scene.add(new THREE.HemisphereLight(0xfff0c7, 0x82b964, 1.7));
 
-  const sun = new THREE.DirectionalLight(0xffc879, 3.15);
+  const sun = new THREE.DirectionalLight(0xffc879, 1.85);
   sun.position.set(-18, 28, 12);
-  sun.castShadow = true;
+  sun.castShadow = false;
   sun.shadow.mapSize.width = 2048;
   sun.shadow.mapSize.height = 2048;
   scene.add(sun);
@@ -1898,8 +1898,8 @@ function loadModelTemplate(modelName) {
         const template = gltf.scene;
         template.traverse((child) => {
           if (child.isMesh) {
-            child.castShadow = true;
-            child.receiveShadow = true;
+            child.castShadow = false;
+            child.receiveShadow = false;
           }
         });
         modelTemplates.set(modelName, template);
